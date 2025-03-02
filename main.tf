@@ -4,54 +4,8 @@ provider "google" {
   zone    = "us-central1-a"
 }
 
-resource "google_compute_instance" "default" {
+resource "google_compute_instance_template" "vcc" {
   name         = "vm-vcc"
-  machine_type = "n1-standard-1"
-  zone         = "us-central1-a"
-
-  boot_disk {
-    initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2004-lts"
-    }
-  }
-
-  network_interface {
-    network = "default"
-    access_config {}
-  }
-}
-
-resource "google_compute_autoscaler" "default" {
-  name   = "autoscaler-for-vm"
-  zone   = "us-central1-a"
-  target = google_compute_instance_group_manager.default.id
-
-  autoscaling_policy {
-    max_replicas    = 5
-    min_replicas    = 1
-    cooldown_period = 60
-
-    cpu_utilization {
-      target = 0.7
-    }
-  }
-}
-
-resource "google_compute_instance_group_manager" "default" {
-  name = "igm-vcc"
-  base_instance_name = "my-base-instance"
-  zone = "us-central1-a"
-
-  version {
-    instance_template = google_compute_instance_template.default.id
-    name              = "primary"
-  }
-
-  target_size = 3
-}
-
-resource "google_compute_instance_template" "default" {
-  name         = "instance-template-vcc"
   machine_type = "n1-standard-1"
 
   disk {
@@ -63,6 +17,37 @@ resource "google_compute_instance_template" "default" {
   network_interface {
     network = "default"
     access_config {}
+  }
+
+  tags = ["http-server"]
+}
+
+resource "google_compute_instance_group_manager" "vcc" {
+  name               = "igm-vcc"
+  base_instance_name = "vm-vcc"
+  zone               = "us-central1-a"
+
+  version {
+    instance_template = google_compute_instance_template.vcc.id
+    name              = "primary"
+  }
+
+  target_size = 3
+}
+
+resource "google_compute_autoscaler" "vcc" {
+  name   = "autoscaler-for-vm"
+  zone   = "us-central1-a"
+  target = google_compute_instance_group_manager.vcc.id
+
+  autoscaling_policy {
+    max_replicas    = 5
+    min_replicas    = 1
+    cooldown_period = 60
+
+    cpu_utilization {
+      target = 0.7
+    }
   }
 }
 
