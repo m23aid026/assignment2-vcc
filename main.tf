@@ -1,7 +1,6 @@
 provider "google" {
   project = "vcc-25"
-  region  = "us-central1"
-  zone    = "us-central1-a"
+  region  = "asia-south2"
 }
 
 resource "google_compute_instance_template" "vcc" {
