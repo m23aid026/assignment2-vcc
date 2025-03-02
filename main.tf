@@ -13,16 +13,16 @@ resource "google_compute_instance_template" "vcc" {
     auto_delete  = true
     boot         = true
   }
-
   network_interface {
     network = "default"
     access_config {}
   }
-
-  metadata_startup_script = <<EOT
-    #!/bin/bash
-    echo "Hello, Terraform VM!" > /var/www/html/index.html
-  EOT
+  metadata = {
+    startup-script = <<-EOF
+        #!/bin/bash
+        echo "Hello, Terraform VM!" > /var/www/html/index.html
+    EOF
+  }
 }
 
 resource "google_compute_instance_group_manager" "vcc" {
