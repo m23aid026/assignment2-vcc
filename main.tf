@@ -19,7 +19,10 @@ resource "google_compute_instance_template" "vcc" {
     access_config {}
   }
 
-  tags = ["http-server"]
+  metadata_startup_script = <<EOT
+    #!/bin/bash
+    echo "Hello, Terraform VM!" > /var/www/html/index.html
+  EOT
 }
 
 resource "google_compute_instance_group_manager" "vcc" {
@@ -47,7 +50,7 @@ resource "google_compute_autoscaler" "vcc" {
 
     cpu_utilization {
       target = 0.7
-    }
+   }
   }
 }
 
@@ -74,4 +77,13 @@ resource "google_compute_firewall" "allow_http" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["http-server"]
+}
+
+resource "google_project_iam_binding" "viewer_role" {
+  project = "vcc-25"
+  role    = "roles/viewer"
+
+  members = [
+    "serviceAccount:vcc-10@vcc-25.iam.gserviceaccount.com"
+  ]
 }
