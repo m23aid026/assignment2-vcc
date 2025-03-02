@@ -104,12 +104,14 @@ resource "google_project_iam_binding" "vm_admin_binding" {
 }
 
 resource "google_compute_firewall" "allow_egress" {
-  name    = "allow-egress"
-  network = "default"
+  name      = "allow-egress"
+  network   = "default"
+  direction = "EGRESS"
 
   allow {
     protocol = "all"
   }
 
   destination_ranges = ["0.0.0.0/0"]
+  source_ranges      = ["0.0.0.0/0"] # ✅ Fix: Define source_ranges to avoid error
 }
