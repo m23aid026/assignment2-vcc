@@ -36,7 +36,6 @@ resource "google_compute_region_instance_group_manager" "vcc" {
     instance_template = google_compute_instance_template.vcc.id
     name              = "primary"
   }
-  target_size = 3
 
   auto_healing_policies {
     health_check      = google_compute_health_check.default.id
@@ -58,6 +57,7 @@ resource "google_compute_autoscaler" "vcc" {
       target = 0.7
     }
   }
+  depends_on = [google_compute_region_instance_group_manager.vcc]
 }
 
 resource "google_compute_health_check" "default" {
@@ -113,5 +113,5 @@ resource "google_compute_firewall" "allow_egress" {
   }
 
   destination_ranges = ["0.0.0.0/0"]
-  source_ranges      = ["0.0.0.0/0"] # ✅ Fix: Define source_ranges to avoid error
+  source_ranges      = ["0.0.0.0/0"]
 }
