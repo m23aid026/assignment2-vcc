@@ -39,6 +39,7 @@ resource "google_compute_autoscaler" "default" {
 
 resource "google_compute_instance_group_manager" "default" {
   name = "igm-vcc"
+  base_instance_name = "my-base-instance"
   zone = "us-central1-a"
 
   version {
@@ -46,7 +47,7 @@ resource "google_compute_instance_group_manager" "default" {
     name              = "primary"
   }
 
-  target_size = 1
+  target_size = 3
 }
 
 resource "google_compute_instance_template" "default" {
