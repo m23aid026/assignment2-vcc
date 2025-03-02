@@ -1,7 +1,6 @@
 provider "google" {
   project = "vcc-25"
   region  = "us-central1"
-  zone    = "us-central1-a"
 }
 
 resource "google_compute_instance_template" "vcc" {
@@ -19,19 +18,19 @@ resource "google_compute_instance_template" "vcc" {
   }
   metadata = {
     startup-script = <<-EOF
-            #!/bin/bash
-            apt update && apt install -y apache2
-            echo "Hello, Terraform VM!" > /var/www/html/index.html
-            systemctl restart apache2
-        EOF
+        #!/bin/bash
+        apt update && apt install -y apache2
+        echo "Hello, Terraform VM!" > /var/www/html/index.html
+        systemctl restart apache2
+    EOF
   }
   tags = ["http-server"]
 }
 
-resource "google_compute_instance_group_manager" "vcc" {
+resource "google_compute_region_instance_group_manager" "vcc" {
   name               = "igm-vcc"
   base_instance_name = "vm-vcc"
-  zone               = "us-central1-a"
+  region             = "us-central1"
 
   version {
     instance_template = google_compute_instance_template.vcc.id
@@ -48,7 +47,7 @@ resource "google_compute_instance_group_manager" "vcc" {
 resource "google_compute_autoscaler" "vcc" {
   name   = "autoscaler-for-vm"
   zone   = "us-central1-a"
-  target = google_compute_instance_group_manager.vcc.id
+  target = google_compute_region_instance_group_manager.vcc.id
 
   autoscaling_policy {
     max_replicas    = 5
@@ -102,4 +101,15 @@ resource "google_project_iam_binding" "vm_admin_binding" {
   members = [
     "serviceAccount:vcc-10@vcc-25.iam.gserviceaccount.com"
   ]
+}
+
+resource "google_compute_firewall" "allow_egress" {
+  name    = "allow-egress"
+  network = "default"
+
+  allow {
+    protocol = "all"
+  }
+
+  destination_ranges = ["0.0.0.0/0"]
 }

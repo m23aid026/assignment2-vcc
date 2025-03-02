@@ -17,7 +17,9 @@ jobs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
-    
+      with:
+        terraform_version: 1.5.7
+
     - name: 'Authenticate to Google Cloud'
       uses: 'google-github-actions/auth@v1'
       with:
@@ -27,13 +29,24 @@ jobs:
       uses: 'google-github-actions/setup-gcloud@v1'
 
     - name: 'Use gcloud CLI'
-      run: 'gcloud info'
+      run: gcloud info
 
     - name: Terraform Init
       run: terraform init
 
     - name: Terraform Format
+      run: terraform fmt -recursive
+
+    - name: Terraform Format Check
       run: terraform fmt -check
+
+    - name: Terraform Validate Syntax
+      run: terraform validate
+
+    - name: Import Existing IAM Role
+      run: |
+        terraform state list | grep google_project_iam_custom_role.vm_admin || \
+        terraform import google_project_iam_custom_role.vm_admin projects/vcc-25/roles/vmAdmin
 
     - name: Terraform Plan
       run: terraform plan
