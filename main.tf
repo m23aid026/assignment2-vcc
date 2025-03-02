@@ -43,9 +43,9 @@ resource "google_compute_region_instance_group_manager" "vcc" {
   }
 }
 
-resource "google_compute_autoscaler" "vcc" {
+resource "google_compute_region_autoscaler" "vcc" {
   name   = "autoscaler-for-vm"
-  zone   = "us-central1-a"
+  region = "us-central1"
   target = google_compute_region_instance_group_manager.vcc.id
 
   autoscaling_policy {
