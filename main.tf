@@ -24,7 +24,6 @@ resource "google_compute_instance_template" "vcc" {
 resource "google_compute_instance_group_manager" "vcc" {
   name               = "igm-vcc"
   base_instance_name = "vm-vcc"
-  zone               = "us-central1-a"
 
   version {
     instance_template = google_compute_instance_template.vcc.id
@@ -36,7 +35,6 @@ resource "google_compute_instance_group_manager" "vcc" {
 
 resource "google_compute_autoscaler" "vcc" {
   name   = "autoscaler-for-vm"
-  zone   = "us-central1-a"
   target = google_compute_instance_group_manager.vcc.id
 
   autoscaling_policy {
